@@ -5,6 +5,10 @@ Simple soduko game built in Backbone.js
 
 Its built with backbone.js and bootstrap.
 
+### Status
+As of contest time I have it working. No external storage. Need to
+add in some views to help with game state, maybe a random seed generator.
+
 ### Itch
 This a simple experiment to see how I could impliment a
 sudoku puzzle in Backbone. It uses basic models and collections
