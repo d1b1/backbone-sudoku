@@ -1,0 +1,33 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+.grid {
+  margin: auto auto;
+  heigth: 1000px;
+  width: 1000px;
+}
+
+.block {
+  float: left;
+  border: 2px solid green;
+  position: relative;
+  width: 33% !important
+}
+
+.cell {
+  float: left;
+  position: relative;
+  width: 33%;
+  height: 100px;
+  border: 1px solid #000000;
+}
+
+#Header {
+  width: 1000px;
+  margin: auto;
+}
