@@ -3,5 +3,6 @@ var app = express();
 
 app.use(express.static(__dirname + '/assets'));
 
-app.listen(80);
+var port = process.env.PORT || 3000
+app.listen(port);
 
