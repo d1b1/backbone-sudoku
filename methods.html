@@ -45,325 +45,48 @@
 
     <div class="container">
 
-      <div class="starter-template">
-        <h1>Sodoku with Backbone and Bootstrap</h1>
-        <p class="lead">Use this document as a way to quickly start any new project.
-          <br> All you get is this text and a mostly barebones HTML document.
+      <div>
+        <h1>Collection, Model & Views Methods</h1>
+        <p class="lead">Added some helpers to dry out the code.
+
+          <br>
+          <br>
+
+          <b>Collection.setup(n)</b> - Creates a puzzle grid of n x n blocks. Each block contains 9 cells.
+          <br>
+          <b>Collection.setTo(x, y, value)</b> - Create a puzzle grid cell using x, y.
+          <br>
+          <b>Collection.getBlock(n)</b> - Accepts a Block number and returns all cells.
+          <br>
+          <b>Collection.getLastCell(n)</b> - Gets the last well of a grid.
+          <br>
+          <b>Collection.getRow(n)</b> - Gets all the cells in a grid row.
+          <br>
+          <b>Collection.getColumn(n)</b> - Gets all the cells in a grid column.
+
+          <br>
+          <br>
+          <b>Model.getRow()</b> - Returns the row number of the model cell.
+          <br>
+          <b>Model.getColumn()</b> - Returns the row number of the model cell.
+          <br>
+          <b>Model.getIndex()</b> - Returns the index of the bock in the grid.
+          <br>
+
+          <b>Model.getBlock()</b> - Returns the block number of the current cell.
+          <br>
+          <br>
+          <b>View.CellView</b> - Build an individual cell view.
+          <br>
+          <b>View.BlockView</b> - Build an individual block view.
+          <br>
+          <b>View.PuzzleView</b> - Build an puzzle view.
+
         </p>
       </div>
 
-      <div id="Header" class="row"></div>
-      <div id="Soduko" class="row"></div>
-      <h3 id="Message" class="row"></h3>
-
     </div><!-- /.container -->
 
-    <script>
-      $(document).ready(function() {
-
-      var Cell = Backbone.Model.extend({
-        defaults: {
-          x: 0,
-          y: 0,
-          value: 0,
-          locked: false,
-        },
-        validate: function() {
-          var self = this;
-
-          // ----------------------------------------------
-          // Check the Block First.
-          var blockCells = grid.getBlock( this.getBlock() );
-
-          var cells = _.filter(blockCells, function(model) {
-            return model.get('value') == self.attributes.value;
-          });
-
-          // Filter to remove the model from the results.
-          cells = _.reject(cells, function(model) {
-            return model.cid == self.cid;
-          });
-
-          if (cells.length > 0) {
-            return "Oops this value has already been used in this block.";
-          }
-
-          // ---------------------------------------------
-          // Second, check the row
-          var rowCells = this.getRow();
-
-          var cells = _.filter(rowCells, function(model) {
-            return model.get('value') == self.attributes.value;
-          });
-
-          // Filter to remove the model from the results.
-          cells = _.reject(cells, function(model) {
-            return model.cid == self.cid;
-          });
-
-          if (cells.length > 0) {
-            return "Oops this value had already been used in this row.";
-          }
-
-          // ---------------------------------------------
-          // Third, check the column.
-          var columnCells = this.getColumn();
-
-          var cells = _.filter(columnCells, function(model) {
-            return model.get('value') == self.attributes.value;
-          });
-
-          // Filter to remove the model from the results.
-          cells = _.reject(cells, function(model) {
-            return model.cid == self.cid;
-          });
-
-          if (cells.length > 0) {
-            return "Oops this value had already been used in this column.";
-          }
-        },
-        getIndex: function() {
-          var idx = (this.attributes.y * 9) + this.attributes.x;
-          return idx;
-        },
-        getColumn: function() {
-          var self = this;
-          return _.filter(this.collection.models, function(model) {
-            return self.get('x') == model.get('x');
-          });
-        },
-        getRow: function() {
-          var self = this;
-          return _.filter(this.collection.models, function(model) {
-            return self.get('y') == model.get('y');
-          });
-        },
-        getBlock: function() {
-          var blk = 1;
-          var idx = this.getIndex();
-          if (this.attributes.x < 3) {
-            blk = 1;
-          } else if (this.attributes.x < 6) {
-            blk = 2;
-          } else if (this.attributes.x < 9) {
-            blk = 3;
-          }
-
-          if (idx < 27) {
-            blk = blk;
-          } else if (idx < 54) {
-            blk = blk + 3;
-          } else if (idx < 81) {
-            blk = blk + 6;
-          }
-          return blk;
-        }
-      });
-
-      var Grid = Backbone.Collection.extend({
-        model: Cell,
-        initialize: function(options) {
-          var self = this;
-        },
-        setup: function(size) {
-          var self = this;
-          self.puzzleSize = size || 1;
-          self.blockCount = ( self.puzzleSize ) * 3;
-
-          for (var x = 0; x < self.blockCount; x++) {
-            for (var y = 0; y < self.blockCount; y++) {
-              self.add({ x: x, y: y });
-            }
-          }
-        },
-        getBlock: function(blockNum) {
-          return _.filter(this.models, function(model) {
-            return model.getBlock() == blockNum;
-          });
-        },
-        getRow: function(x) {
-          var self = this;
-          return _.filter(this.models, function(model) {
-            return x == model.get('x');
-          });
-        },
-        getColumn: function(y) {
-          var self = this;
-          return _.filter(this.models, function(model) {
-            return y == model.get('y');
-          });
-        },
-        getLastCell: function(blockNum) {
-          var max = null;
-          var models = (blockNum) ? this.getBlock(blockNum) : this.models;
-          _.each(this.models, function(model) {
-            if (!max) {
-              max = model;
-            } else {
-              if (model.getIndex() > max.getIndex()) {
-                max = model;
-              }
-            }
-          });
-          return max;
-        },
-        setTo: function(x, y, value) {
-          var model = _.find(this.models, function(model) {
-            return model.get('x') == x && model.get('y') == y;
-          });
-
-          if (!model) return console.log('Oops this cell could not be found.');
-
-          model.set({ value: value, locked: true });
-        }
-      });
-
-      var InfoView = Backbone.View.extend({
-        initialize: function() {
-          this.collection.on('change', this.render, this);
-        },
-        template: "<h1>Size: <%=puzzelSize%>, Blocks: <%=blockCount%>, Cells: <%=cellCount%></h1>",
-        render: function() {
-          var data = {
-            puzzelSize: this.collection.puzzleSize,
-            blockCount: this.collection.blockCount,
-            cellCount: this.collection.length
-          };
-
-          $('#Header').html(_.template(this.template, data));
-        }
-      });
-
-      var CellView = Backbone.View.extend({
-        tagName: 'div',
-        events: {
-          'keyup .data': 'changeData'
-        },
-        className: 'data cell',
-        initialize: function() {
-
-          _.bindAll(this, 'render', 'changeData');
-
-          this.model.on('validate', this.checkValidation, this);
-          this.model.on('change', this.render);
-        },
-        checkValidation: function() {
-          if (this.model.get('status') > 0) {
-            this.$el.removeClass('alert-danger');
-          } else {
-            this.$el.addClass('alert-danger');
-          }
-        },
-        changeData: function(evt) {
-          var value = $(evt.currentTarget).html();
-
-          if (isNaN(value)) {
-            $(evt.currentTarget).html("");
-            return;
-          }
-
-          // Store the value.
-          this.model.set({ value: Number(value) });
-
-          if (value == 0) {
-            this.$el.removeClass('alert-danger');
-            return;
-          }
-
-          // If it a valid selection.
-          if (!this.model.isValid()) {
-            $('#Message').html(this.model.validationError);
-            this.$el.addClass('alert-danger');
-          } else {
-            this.$el.removeClass('alert-danger');
-            $('#Message').html('That works!');
-          }
-        },
-        template: '<span class="locations hide">x:<%=x%>, y:<%=y%></span><br><font style="margin:40%" class="data" contenteditable="<%=!locked%>" size="20"><%=value%></font>',
-        render: function() {
-          var self = this;
-
-          var content = _.template(this.template, this.model.toJSON());
-
-          $(this.el).html(content);
-
-          return this;
-        }
-      });
-
-      var BlockView = Backbone.View.extend({
-        className: 'row block col-md-4',
-        template: '<div class="col-md-4 row" hstyle="margin-bottom: 10px;"></div>',
-        initialize: function(options) {
-          _.bindAll(this, 'render');
-
-          this.blockNum = options.blockNum;
-        },
-        render: function() {
-          var self = this;
-          var models = this.collection.getBlock( this.blockNum );
-          var html = $(_.template(this.template, {}));
-
-          var rows = _.groupBy(models, function(model){ return model.get('y') });;
-
-          _.each(rows, function(rowCells) {
-            _.each(rowCells, function(model) {
-              var view = new CellView({ model: model });
-              $(html).append(view.render().el);
-            });
-
-          });
-
-          this.$el = html;
-
-          $('#Soduko').append(this.$el);
-          return this;
-        }
-      });
-
-      var Puzzle = Backbone.View.extend({
-        render: function() {
-          var self = this;
-          var t = this.collection.puzzleSize * this.collection.puzzleSize;
-
-          // _.each(this.collection.models, function(model) {
-          //  console.log(model.get('x'), model.get('y'), model.getBlock());
-          // });
-
-          for (var x = 1; x <= t; x++) {
-            new BlockView({ collection: self.collection, blockNum: x }).render();
-          }
-
-          new InfoView({ collection: this.collection }).render();
-        }
-      });
-
-      var grid = new Grid();
-      grid.setup( 3 );
-
-      var puzzle = new Puzzle({ collection: grid });
-
-      puzzle.render();
-
-      grid.setTo(0, 0, 1);
-      grid.setTo(1, 1, 2);
-      grid.setTo(2, 2, 3);
-      grid.setTo(3, 3, 4);
-      grid.setTo(4, 4, 5);
-      grid.setTo(5, 5, 6);
-      grid.setTo(6, 6, 7);
-      grid.setTo(7, 7, 8);
-      grid.setTo(0, 8, 9);
-
-      // var blockInOne = grid.getBlock(9);
-      // _.each(blockInOne, function(model) {
-      //   console.log(model.get('x'), model.get('y'), 'Index' , model.getIndex(), 'Block', model.getBlock());
-      // });
-
-      // console.log('the max', grid.getLastCell(8));
-
-    });
-    </script>
 
   </body>
 </html>

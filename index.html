@@ -218,6 +218,8 @@
         }
       });
 
+      // Setup the Views.
+
       var InfoView = Backbone.View.extend({
         initialize: function() {
           this.collection.on('change', this.render, this);
@@ -316,6 +318,10 @@
 
           this.$el = html;
 
+          // Attach the puzzle to the ID.
+          // TODO: Move the attachment DOM element to the options so
+          // we can move it around.
+
           $('#Soduko').append(this.$el);
           return this;
         }
@@ -324,13 +330,9 @@
       var Puzzle = Backbone.View.extend({
         render: function() {
           var self = this;
-          var t = this.collection.puzzleSize * this.collection.puzzleSize;
+          var blocksInPuzzle = this.collection.puzzleSize * this.collection.puzzleSize;
 
-          // _.each(this.collection.models, function(model) {
-          //  console.log(model.get('x'), model.get('y'), model.getBlock());
-          // });
-
-          for (var x = 1; x <= t; x++) {
+          for (var x = 1; x <= blocksInPuzzle; x++) {
             new BlockView({ collection: self.collection, blockNum: x }).render();
           }
 
@@ -338,13 +340,18 @@
         }
       });
 
+      // Ok get started. Create a Grid.
+
       var grid = new Grid();
       grid.setup( 3 );
 
+      // Create the Puzzle View and feed it a the grid.
       var puzzle = new Puzzle({ collection: grid });
 
+      // Now render the puzzle.
       puzzle.render();
 
+      // Now lets setup the puzzle seeds.
       grid.setTo(0, 0, 1);
       grid.setTo(1, 1, 2);
       grid.setTo(2, 2, 3);
@@ -354,13 +361,6 @@
       grid.setTo(6, 6, 7);
       grid.setTo(7, 7, 8);
       grid.setTo(0, 8, 9);
-
-      // var blockInOne = grid.getBlock(9);
-      // _.each(blockInOne, function(model) {
-      //   console.log(model.get('x'), model.get('y'), 'Index' , model.getIndex(), 'Block', model.getBlock());
-      // });
-
-      // console.log('the max', grid.getLastCell(8));
 
     });
     </script>
